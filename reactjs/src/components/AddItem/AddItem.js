@@ -48,7 +48,6 @@ function AddItem() {
             {
                 method: 'GET',
                 credentials: 'include',
-
             });
         const owners = await response.json();
         setOwners(owners);

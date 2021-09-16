@@ -16,12 +16,24 @@ function ItemViewContent(id) {
 
     const [itemId, setItemID] = useState(id.value);
     const [item, setItem] = useState([]);
-    const [user, setUser] = useState([]);
+    const [owner, setOwner] = useState([]);
+    const [userEmail, setEmail] = useState([]);
     let [estimatedPrice, setEstimatedPrice] = useState(0);
 
     useEffect(() => {
         fetchItemDetails(itemId);
+        fetchUserEmail();
     }, []);
+
+    const fetchUserEmail = () => {
+        if (Cookies.get("Authorization") !== undefined) {
+            const token = Cookies.get("Authorization");
+            const decodedToken = jwt_decode(token);
+            console.log(decodedToken);
+            setEmail(decodedToken.sub);
+        }
+    }
+
 
     const fetchItemDetails = async (itemId) => {
         const response = await fetch(`http://localhost:8080/api/items/${itemId}`,
@@ -31,9 +43,9 @@ function ItemViewContent(id) {
 
             });
         const item = await response.json();
-        setUser(item.owner);
+        setOwner(item.owner);
         setItem(item);
-        console.log(user);
+        console.log(owner);
     }
     function handleClick() {
 
@@ -49,7 +61,7 @@ function ItemViewContent(id) {
 
     // google api key needed below
 //    Geocode.setApiKey("");
-//    Geocode.fromAddress(user.address + ", " + user.city).then(
+//    Geocode.fromAddress(owner.address + ", " + owner.city).then(
 //        response => {
 //            const { lat, lng } = response.results[0].geometry.location;
 //            console.log(lat, lng);
@@ -67,12 +79,32 @@ function ItemViewContent(id) {
             let tokenExpiration = jwt_decode(token).exp;
             let dateNow = new Date();
             if (tokenExpiration > dateNow.getTime() / 1000) {
-                history.push(itemLinkToPay);
+                // history.push(itemLinkToPay);
+                console.log("hello");
             }
         }
         else{
             lightUpLoginOptions();
         }
+    }
+
+    const {register, handleSubmit, errors} = useForm();
+
+    const onSubmit =  async (data) => {
+        const headers = new Headers();
+        headers.append('Content-type', 'application/json');
+
+        console.log(data);
+
+        const options = {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(data)
+        }
+
+        const request = new Request('http://localhost:8080/api/reservations', options);
+        const response = await fetch(request);
+        const status = await response.status;
     }
 
     function lightUpLoginOptions(){
@@ -115,6 +147,7 @@ function ItemViewContent(id) {
     return (
 
         <div className="wrapper" >
+            <form onChange={calculatePrice} onSubmit={handleSubmit(onSubmit)}>
             <div className="item-view-container">
                 <div id="photos-name-price-container">
                     <div className="main-item-photo-area">
@@ -133,29 +166,35 @@ function ItemViewContent(id) {
                     <div id="item-name-price">
                         <p className="item-heading">{item.name}</p>
                         <p className="item-heading-2">Price: {item.price} pln/day</p>
-                        <form onChange={calculatePrice}>
+
                             <div className="calendar">
-                                <p className="form-label">From :</p><input type="date"
-                                      className="input-field start-date"/>
-                                <p className="form-label">Until :</p><input type="date"
-                                      className="input-field end-date"/>
+                                <p className="form-label">From:</p>
+                                <input type="date" className="input-field start-date" name="reservationStartDate"
+                                       ref={register()}/>
+                                <p className="form-label">Until :</p>
+                                <input type="date" className="input-field end-date" name="reservationEndDate"
+                                       ref={register()}/>
                                 <p className="price-estimation">Estimated price: {estimatedPrice} pln</p>
+                                <input name="price" value={estimatedPrice} ref={register()} style={{display: "none"}}/>
+                                <input name="itemId" value={item.id} ref={register()} style={{display: "none"}}/>
+                                <input name="userEmail" value={userEmail} ref={register()} style={{display: "none"}}/>
                             </div>
-                        </form>
+
                     </div>
                     <div className="description-renter-name">
-                        <button className="see-renter" type="submit">{user.firstName} {user.lastName}</button>
+                        <button className="see-renter" type="submit">{owner.firstName} {owner.lastName}</button>
                         <p className="item-heading-2 item-heading-description">Description</p>
                         <p className="item-normal-text">{item.description}</p>
                     </div>
                     <div>
-                       <button className="button book-now" type="submit" onClick={handleClick} onClick={authorizeListItemAccess}>Rent Me!</button>
+                       <button className="button book-now" type="submit" onClick={onSubmit()} onClick={handleClick} onClick={authorizeListItemAccess}>Rent Me!</button>
                     </div>
                 </div>
                     <p className="item-heading-2 item-location">Location</p>
-                    <p>{user.address}, {user.postCode} {user.city}</p>
-                    <ItemViewMap lat={user.lat} lng={user.lng}/>
+                    <p>{owner.address}, {owner.postCode} {owner.city}</p>
+                    <ItemViewMap lat={owner.lat} lng={owner.lng}/>
             </div>
+            </form>
         </div>
     )
 }
