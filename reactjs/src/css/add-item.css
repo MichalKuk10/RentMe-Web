@@ -137,5 +137,21 @@ h6 a{
     cursor: pointer;
 }
 
+.files-upload{
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 5fr;
+}
 
+.acc-upload{
+    margin: auto;
+    margin-top: 40px;
+    width: 130px !important;
+    height: 50px;
+}
+
+.files-list{
+    margin-top: 25px !important;
+    height: 260px !important;
+}
 

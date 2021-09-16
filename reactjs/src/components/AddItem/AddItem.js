@@ -129,8 +129,6 @@ function AddItem() {
                 <h7>Add Item</h7>
                 <form className="account-settings-form" style={{borderRadius: "12px"}} onSubmit={handleSubmit(onSubmit)}>
 
-                    <input name="id" value={""} ref={register()} style={{display: "none"}}/>
-
                     <div className="account-settings-section acc-name">
                         <p className="acc-title"></p>
                         <div className="acc-input-container acc-fist-name">
@@ -158,12 +156,14 @@ function AddItem() {
                             <input style={{width: "150px", margin: "auto"}} type="number" min="0" step="0.50" className="acc-input" name="price"></input>
                         </div>
                     </div>
-                    <div className="account-settings-section acc-img">
-                        <p className="acc-input-label">Upload images</p>
-                        <input className="acc-input" type="file" min="0" step="0.50" className="acc-input" name="files" multiple></input>
-                                            </div>
-
-
+                    <div className="files-upload">
+                        <label className="acc-button acc-upload" style={{paddingBottom: "5px", paddingTop: "5px"}}>
+                            <input className="acc-input" type="file" min="0" step="0.50" name="files" style={{display: "none"}} multiple></input>
+                                Upload images
+                        </label>
+                        <div className="acc-input files-list" style={{margin: "auto", textAlign: "center"}}>
+                        List of files</div>
+                    </div>
 
                     <button className="acc-button acc-save-changes">Add item</button>
                 </form>
